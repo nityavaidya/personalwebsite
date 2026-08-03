@@ -24,7 +24,6 @@
   --measure:1060px;
   --fillet:14px;
   --tab-drop:18px;          /* how far the tab's colour runs on under the folder */
-  --tl-indent:30px;         /* timeline rail sits inside the content box */
 
   /* handmade mulberry paper, tiled seamlessly */
   --tex:url("/paper.jpg");
@@ -154,34 +153,33 @@ body{
 .panel > .panel-inner{overflow:hidden;min-height:0;content-visibility:auto}
 .panel-pad{padding:30px 0 18px}
 
-/* ---------------- work timeline ---------------- */
-.tl{list-style:none;margin:0;padding:0 0 0 var(--tl-indent);position:relative}
-.tl-item{position:relative;padding-bottom:52px;list-style:none}
-.tl-item:last-child{padding-bottom:2px}
-.tl-item::before{
-  content:"";position:absolute;
-  left:calc(var(--tl-indent) * -1 + 5px);top:0;bottom:0;
-  width:1px;background:rgba(30,27,23,.32);
-}
-.tl-item:last-child::before{display:none}
-.tl-item::after{
-  content:"";position:absolute;
-  left:calc(var(--tl-indent) * -1 + 1px);top:8px;
-  width:9px;height:9px;border-radius:50%;
-  background:var(--ink);
-  box-shadow:0 0 0 7px var(--body);
+/* ---------------- work: mirrors the writings index pattern ---------------- */
+.tl{list-style:none;margin:0;padding:0;max-width:840px}
+.tl-item + .tl-item{margin-top:clamp(30px,3.8vw,44px)}
+.tl-item{
+  display:grid;
+  grid-template-columns:152px minmax(0,1fr);
+  gap:0 32px;
+  list-style:none;
 }
 
-.meta{
-  display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;
-  font-weight:600;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
-  color:rgba(30,27,23,.72);margin:0 0 6px;
+.meta-col{display:block;margin-top:.78em}
+.role-label,.date-label{
+  display:block;
+  font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  white-space:nowrap;
 }
-.meta em{font-style:normal;opacity:.6}
+.role-label{font-size:12.5px}
+.date-label{font-size:10.5px;letter-spacing:.14em}
+.role-label{color:rgba(30,27,23,.8)}
+.date-label{margin-top:4px;color:rgba(30,27,23,.48)}
+
 .entry-name{
   font-family:"Newsreader",Georgia,serif;font-weight:500;
   font-size:clamp(29px,4.2vw,40px);line-height:1.06;letter-spacing:-.018em;margin:0;
+  display:inline-block;
 }
+
 .entry-note{
   font-family:"Newsreader",Georgia,serif;font-style:italic;
   font-size:clamp(16px,2vw,18px);line-height:1.4;margin:9px 0 0;max-width:48ch;
@@ -320,11 +318,14 @@ body{
 
 /* ---------------- responsive ---------------- */
 @media (max-width:680px){
-  :root{--fillet:11px;--tab-drop:15px;--tl-indent:24px;--tex-size:680px}
+  :root{--fillet:11px;--tab-drop:15px;--tex-size:680px}
   .folder--play{--off:20%;margin-top:2px}
   .folder--write{--off:8%;margin-top:2px}
   .tab{font-size:11px;padding:0 14px;height:36px;line-height:36px;letter-spacing:.07em}
-  .tl-item{padding-bottom:42px}
+  .tl-item{grid-template-columns:1fr;gap:0}
+  .meta-col{display:flex;gap:10px;align-items:baseline;margin:0 0 8px}
+  .date-label{margin-top:0}
+  .date-label::before{content:"\00b7";margin-right:10px;color:rgba(30,27,23,.35)}
   .split{gap:14px}
   .things{gap:28px}
   .thing svg{width:78px;height:78px}
@@ -363,27 +364,42 @@ body{
               <ul class="tl">
 
                 <li class="tl-item">
-                  <p class="meta">Co-founder &amp; CEO <em>2024 — 2026</em></p>
-                  <h3 class="entry-name">paperplane</h3>
-                  <p class="entry-note">AI-native product analytics that made products self-improving</p>
-                  <p class="entry-body">We took Paperplane from an idea to paying users in 3 weeks, and hit 5-figure MRR by month 4.</p>
-                  <p class="entry-body">We built agents that read behavioral data, found where users got stuck, and built the fix.</p>
-                  <p class="entry-body">I led a team of 7 across engineering, design, and sales. On the technical side I owned agent orchestration, data pipelines, retrieval workflows and evals. On the business side I owned product, design, pricing, GTM and investor relations.</p>
+                  <div class="meta-col">
+                    <p class="role-label">Co-founder &amp; CEO</p>
+                    <p class="date-label">2024 — 2026</p>
+                  </div>
+                  <div>
+                    <h3 class="entry-name">paperplane</h3>
+                    <p class="entry-note">AI-native product analytics that made products self-improving</p>
+                    <p class="entry-body">We took Paperplane from an idea to paying users in 3 weeks, and hit 5-figure MRR by month 4.</p>
+                    <p class="entry-body">We built agents that read behavioral data, found where users got stuck, and built the fix.</p>
+                    <p class="entry-body">I led a team of 7 across engineering, design, and sales alongside the CTO. On the technical side I owned agent orchestration, data pipelines, retrieval workflows and evals. On the business side I owned product, design, pricing, GTM and investor relations.</p>
+                  </div>
                 </li>
 
                 <li class="tl-item">
-                  <p class="meta">First product hire <em>2023 — 2024</em></p>
-                  <h3 class="entry-name">superjoin &amp; upsurge</h3>
-                  <p class="entry-note">internships at early-stage teams</p>
-                  <p class="entry-body">First product hire at both. I built internal engineering tools, shipped new features, and owned onboarding and retention.</p>
-                  <p class="entry-body">Lifted onboarding completion 15 points, cut integration deployment time by 30%, and reduced post-launch support tickets by 12% and more.</p>
+                  <div class="meta-col">
+                    <p class="role-label">Founding team</p>
+                    <p class="date-label">2023 — 2024</p>
+                  </div>
+                  <div>
+                    <h3 class="entry-name">superjoin &amp; upsurge</h3>
+                    <p class="entry-note">internships at early-stage teams</p>
+                    <p class="entry-body">First product hire at both. I built internal engineering tools, shipped new features, and owned onboarding and retention.</p>
+                    <p class="entry-body">Lifted onboarding completion 15 points, cut integration deployment time by 30%, and reduced post-launch support tickets by 12% and more.</p>
+                  </div>
                 </li>
 
                 <li class="tl-item">
-                  <p class="meta">Director of Innovation <em>2022 — 2023</em></p>
-                  <h3 class="entry-name">founders</h3>
-                  <p class="entry-note">non-profit</p>
-                  <p class="entry-body">Helped build an accelerator that worked with 150+ startups, led a 100-person organization, and launched 5 new programs across the US.</p>
+                  <div class="meta-col">
+                    <p class="role-label">Director</p>
+                    <p class="date-label">2022 — 2023</p>
+                  </div>
+                  <div>
+                    <h3 class="entry-name">founders</h3>
+                    <p class="entry-note">non-profit</p>
+                    <p class="entry-body">Helped build an accelerator that worked with 150+ startups, led a 100-person organization, and launched 5 new programs across the US.</p>
+                  </div>
                 </li>
 
               </ul>
