@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Graph engineering for multi-agent systems — Nitya Vaidya</title>
-<meta name="description" content="What a graph actually is, the seven patterns worth knowing, and how to build one.">
+<meta name="description" content="Building blocks, trust levels, and handoffs for multi-agent systems.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -87,7 +87,7 @@ body{
 /* spacer so the fixed back button doesn't sit on top of the title on load */
 .back-spacer{height:clamp(64px,10vw,92px)}
 
-/* ---------------- footer: byline only, for now ---------------- */
+/* ---------------- footer: byline + sources beneath it, no rule ---------------- */
 .art-foot{
   margin-top:clamp(32px,5.5vw,52px);
   padding:0 0 clamp(30px,5vw,46px);
@@ -100,6 +100,34 @@ body{
   font-size:17.5px;
   color:rgba(30,27,23,.46);
 }
+.footnotes{
+  margin:18px 0 0;
+  padding-left:1.15em;
+  font-size:12px;
+  line-height:1.65;
+  color:rgba(30,27,23,.52);
+}
+.footnotes li{margin:0 0 6px}
+.footnotes li:last-child{margin-bottom:0}
+.footnotes .fnback{
+  margin-left:5px;
+  color:inherit;
+  text-decoration:none;
+  opacity:.7;
+}
+.footnotes .fnback:hover{opacity:1}
+.footnotes a:not(.fnback){color:inherit;text-decoration:underline;text-decoration-color:rgba(30,27,23,.3)}
+
+/* inline footnote markers in the article body */
+sup.fnref{font-size:.68em;margin-left:1px;line-height:0}
+sup.fnref a{
+  color:#A2512F;
+  font-weight:700;
+  text-decoration:none;
+  padding:0 1px;
+}
+sup.fnref a:hover{text-decoration:underline}
+sup.fnref a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 /* ---------------- article head ---------------- */
 .art-head{padding:clamp(28px,6vw,52px) 0 clamp(36px,6vw,56px)}
@@ -260,140 +288,98 @@ body{
     <header class="art-head">
       <p class="eyebrow">Writings</p>
       <h1 class="art-title">Graph engineering for multi-agent systems</h1>
-      <p class="art-dek">What a graph actually is, the seven patterns worth knowing, and how to build one.</p>
+      <p class="art-dek">Building blocks, trust levels, and handoffs for multi-agent systems.</p>
       <p class="art-meta">23 July 2026<span class="art-topic">Orchestration</span></p>
     </header>
 
     <article class="art-body">
-      <p>Graph engineering is having a moment on X right now. The idea's been around for a few years, it's just nice to finally have a term people get excited about, one that can get more people to actually reach for it.</p>
-      <p>Beyond the talk, graphs are a genuinely powerful system for multi-agent workflows, so it's worth understanding what a graph actually is, the patterns that keep showing up, and how to build one yourself.</p>
+      <p>Graph engineering picked up on X this week. The idea's been around for a few years, it's just nice to finally have a term people get excited about, one that can get more people to actually reach for it.</p>
       <h2>How did we get here?</h2>
       <p>Over the last three years, these buzzwords actually built on top of each other and got us here:</p>
       <p>Prompt → Context → Harness → Loop → Graph</p>
-      <ul><li><strong>Prompt engineering</strong> is what the model should do</li><li><strong>Context engineering</strong> is what the model should know</li><li><strong>Harness engineering</strong> is what the model can access or change</li><li><strong>Loop engineering</strong> is how the agent keeps improving</li><li><strong>Graph engineering</strong> is how the whole system coordinates</li></ul>
+      <p>Prompt engineering was just telling the model what to do. Context engineering came next, giving it what it needed to know. Harness gave it room to actually act, tools, access, permission to touch things outside the conversation. Loop meant giving it a way to check its own output and try again if it didn't pass, so it kept working instead of stopping after one attempt. Graph is what sits on top of all of that: several of these loops, wired together, with real rules for how they hand off.</p>
       <p>Most AI applications still happen as a single step. Ask a question, get an answer. A lot of our use cases have grown beyond that. That's what a graph is for.</p>
       <p>In a graph, each node has one responsibility. One researches, one validates, one writes, one decides where to go next. Each node produces its own output. The edges between them define how information moves.</p>
       <p>Formally: nodes do work, edges are transitions, and state travels through both. A node can be plain deterministic code, a single model call, a tool call, or an entire agent with its own internal loop. Edges are either fixed or conditional on what a node returned.</p>
-      <h2>The patterns</h2>
-      <p>Design starts with pattern matching. There are seven worth knowing.</p>
-      <figure class="fig"><div class="fig-box"><svg preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 590" width="100%" font-family="Georgia, 'Times New Roman', serif">
+      <h2>The building blocks</h2>
+      <p>So here's five basic building blocks that can help you start building with graphs. These are from Anthropic, back in December 2024.<sup class="fnref"><a id="fnref-1" href="#fn-1">1</a></sup></p>
+      <figure class="fig"><div class="fig-box"><svg preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 470" width="100%" font-family="Georgia, 'Times New Roman', serif">
   <defs>
     <marker id="fig1-q" markerWidth="8" markerHeight="8" refX="7" refY="2.6" orient="auto"><path d="M0,0 L7,2.6 L0,5.2 Z" fill="#5C574F"/></marker>
     <marker id="fig1-qr" markerWidth="8" markerHeight="8" refX="7" refY="2.6" orient="auto"><path d="M0,0 L7,2.6 L0,5.2 Z" fill="#B5654A"/></marker>
   </defs>
   <style>
     .fig1-n { fill:#7C8C74; fill-opacity:0.16; stroke:#7C8C74; stroke-width:1.3 }
-    .fig1-v { fill:#7A93A8; fill-opacity:0.18; stroke:#7A93A8; stroke-width:1.3 }
     .fig1-t { font-size:10.5px; fill:#2E2A26; text-anchor:middle }
     .fig1-h { font-size:13.5px; fill:#2E2A26 }
     .fig1-s { font-size:11px; fill:#5C574F }
     .fig1-e { stroke:#5C574F; stroke-width:1.2; fill:none }
   </style>
 
-  <!-- ============ sequential ============ -->
-  <text x="16" y="20" class="fig1-h">sequential</text>
-  <rect x="16" y="36" width="62" height="26" rx="3" class="fig1-n"/><text x="47" y="53" class="fig1-t">research</text>
-  <line x1="78" y1="49" x2="92" y2="49" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="96" y="36" width="62" height="26" rx="3" class="fig1-n"/><text x="127" y="53" class="fig1-t">analyse</text>
-  <line x1="158" y1="49" x2="172" y2="49" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="176" y="36" width="62" height="26" rx="3" class="fig1-n"/><text x="207" y="53" class="fig1-t">draft</text>
-  <line x1="238" y1="49" x2="252" y2="49" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="256" y="36" width="62" height="26" rx="3" class="fig1-n"/><text x="287" y="53" class="fig1-t">deliver</text>
-  <text x="16" y="118" class="fig1-s">stages are known and each depends on the last</text>
+  <!-- prompt chaining -->
+  <text x="16" y="20" class="fig1-h">prompt chaining</text>
+  <rect x="16" y="36" width="72" height="26" rx="3" class="fig1-n"/><text x="52" y="53" class="fig1-t">extract</text>
+  <line x1="88" y1="49" x2="104" y2="49" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <rect x="108" y="36" width="72" height="26" rx="3" class="fig1-n"/><text x="144" y="53" class="fig1-t">format</text>
+  <line x1="180" y1="49" x2="196" y2="49" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <rect x="200" y="36" width="72" height="26" rx="3" class="fig1-n"/><text x="236" y="53" class="fig1-t">send</text>
+  <text x="16" y="118" class="fig1-s">each node gets only the context it needs</text>
 
-  <!-- ============ router ============ -->
-  <text x="416" y="20" class="fig1-h">router</text>
-  <rect x="416" y="36" width="64" height="26" rx="3" class="fig1-n"/><text x="448" y="53" class="fig1-t">classify</text>
-  <path d="M480 44 L536 31" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <line x1="480" y1="49" x2="536" y2="59" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <path d="M480 54 L536 87" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="540" y="20" width="66" height="22" rx="3" class="fig1-n"/><text x="573" y="35" class="fig1-t">billing</text>
-  <rect x="540" y="48" width="66" height="22" rx="3" class="fig1-n"/><text x="573" y="63" class="fig1-t">support</text>
-  <rect x="540" y="76" width="66" height="22" rx="3" class="fig1-n"/><text x="573" y="91" class="fig1-t">human</text>
-  <text x="416" y="118" class="fig1-s">work splits cleanly and only one branch runs</text>
+  <!-- routing -->
+  <text x="440" y="20" class="fig1-h">routing</text>
+  <rect x="440" y="36" width="70" height="26" rx="3" class="fig1-n"/><text x="475" y="53" class="fig1-t">classify</text>
+  <path d="M510 44 L562 30" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <line x1="510" y1="49" x2="562" y2="60" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <path d="M510 55 L562 90" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <rect x="566" y="18" width="90" height="24" rx="3" class="fig1-n"/><text x="611" y="34" class="fig1-t">cheap path</text>
+  <rect x="566" y="48" width="90" height="24" rx="3" class="fig1-n"/><text x="611" y="64" class="fig1-t">standard path</text>
+  <rect x="566" y="78" width="90" height="24" rx="3" class="fig1-n"/><text x="611" y="94" class="fig1-t">human review</text>
+  <text x="440" y="118" class="fig1-s">matches cost to how hard the request actually is</text>
 
-  <!-- ============ parallel ============ -->
-  <text x="16" y="160" class="fig1-h">parallel</text>
-  <rect x="16" y="176" width="58" height="26" rx="3" class="fig1-n"/><text x="45" y="193" class="fig1-t">plan</text>
-  <path d="M74 184 L106 166" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <line x1="74" y1="189" x2="106" y2="194" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <path d="M74 194 L106 222" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="110" y="155" width="68" height="22" rx="3" class="fig1-n"/><text x="144" y="170" class="fig1-t">agent A</text>
-  <rect x="110" y="183" width="68" height="22" rx="3" class="fig1-n"/><text x="144" y="198" class="fig1-t">agent B</text>
-  <rect x="110" y="211" width="68" height="22" rx="3" class="fig1-n"/><text x="144" y="226" class="fig1-t">agent C</text>
-  <path d="M178 166 L224 184" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <line x1="178" y1="194" x2="224" y2="189" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <path d="M178 222 L224 194" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="228" y="176" width="72" height="26" rx="3" class="fig1-n"/><text x="264" y="193" class="fig1-t">synthesis</text>
-  <text x="16" y="258" class="fig1-s">subtasks don't depend on each other</text>
+  <!-- parallelization -->
+  <text x="16" y="160" class="fig1-h">parallelization</text>
+  <rect x="16" y="176" width="60" height="26" rx="3" class="fig1-n"/><text x="46" y="193" class="fig1-t">plan</text>
+  <path d="M76 184 L110 166" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <line x1="76" y1="189" x2="110" y2="194" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <path d="M76 194 L110 222" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <rect x="114" y="155" width="72" height="22" rx="3" class="fig1-n"/><text x="150" y="170" class="fig1-t">source A</text>
+  <rect x="114" y="183" width="72" height="22" rx="3" class="fig1-n"/><text x="150" y="198" class="fig1-t">source B</text>
+  <rect x="114" y="211" width="72" height="22" rx="3" class="fig1-n"/><text x="150" y="226" class="fig1-t">source C</text>
+  <path d="M186 166 L226 184" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <line x1="186" y1="194" x2="226" y2="189" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <path d="M186 222 L226 194" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <rect x="230" y="176" width="72" height="26" rx="3" class="fig1-n"/><text x="266" y="193" class="fig1-t">synthesis</text>
+  <text x="16" y="258" class="fig1-s">only pays off when branches don't share context</text>
 
-  <!-- ============ orchestrator ============ -->
-  <text x="416" y="160" class="fig1-h">orchestrator</text>
-  <rect x="416" y="176" width="56" height="26" rx="3" class="fig1-n"/><text x="444" y="193" class="fig1-t">goal</text>
-  <line x1="472" y1="189" x2="486" y2="189" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="490" y="176" width="66" height="26" rx="3" class="fig1-n"/><text x="523" y="193" class="fig1-t">planner</text>
-  <line x1="556" y1="189" x2="570" y2="189" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="574" y="176" width="56" height="26" rx="3" class="fig1-n"/><text x="602" y="193" class="fig1-t">tools</text>
-  <line x1="630" y1="189" x2="644" y2="189" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="648" y="176" width="62" height="26" rx="3" class="fig1-n"/><text x="679" y="193" class="fig1-t">report</text>
-  <path d="M602 202 L602 222 L523 222 L523 206" class="fig1-e" stroke-dasharray="3 3" marker-end="url(#fig1-q)"/>
-  <text x="416" y="258" class="fig1-s">planner decides the steps at runtime</text>
+  <!-- orchestrator-workers -->
+  <text x="440" y="160" class="fig1-h">orchestrator-workers</text>
+  <rect x="440" y="176" width="80" height="26" rx="3" class="fig1-n"/><text x="480" y="193" class="fig1-t">orchestrator</text>
+  <path d="M520 184 L554 166" class="fig1-e" marker-end="url(#fig1-q)" stroke-dasharray="3 3"/>
+  <line x1="520" y1="189" x2="554" y2="194" class="fig1-e" marker-end="url(#fig1-q)" stroke-dasharray="3 3"/>
+  <path d="M520 194 L554 222" class="fig1-e" marker-end="url(#fig1-q)" stroke-dasharray="3 3"/>
+  <rect x="558" y="155" width="66" height="22" rx="3" class="fig1-n"/><text x="591" y="170" class="fig1-t">worker</text>
+  <rect x="558" y="183" width="66" height="22" rx="3" class="fig1-n"/><text x="591" y="198" class="fig1-t">worker</text>
+  <text x="632" y="199" class="fig1-s" text-anchor="start">... N</text>
+  <text x="440" y="258" class="fig1-s">width isn't known until the run is underway</text>
 
-  <!-- ============ review loop ============ -->
-  <text x="16" y="300" class="fig1-h">review loop</text>
-  <rect x="16" y="316" width="62" height="26" rx="3" class="fig1-n"/><text x="47" y="333" class="fig1-t">create</text>
-  <line x1="78" y1="329" x2="92" y2="329" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="96" y="316" width="62" height="26" rx="3" class="fig1-n"/><text x="127" y="333" class="fig1-t">review</text>
-  <line x1="158" y1="329" x2="172" y2="329" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="176" y="316" width="68" height="26" rx="3" class="fig1-n"/><text x="210" y="333" class="fig1-t">approve</text>
-  <path d="M127 342 L127 360 L47 360 L47 346" fill="none" stroke="#B5654A" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#fig1-qr)"/>
-  <text x="87" y="376" font-size="10.5" fill="#B5654A" text-anchor="middle">revise</text>
-  <text x="16" y="398" class="fig1-s">quality matters more than latency</text>
-
-  <!-- ============ evaluator ============ -->
-  <text x="416" y="300" class="fig1-h">evaluator</text>
-  <rect x="416" y="316" width="56" height="26" rx="3" class="fig1-n"/><text x="444" y="333" class="fig1-t">draft</text>
-  <line x1="472" y1="329" x2="486" y2="329" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="490" y="316" width="68" height="26" rx="3" class="fig1-n"/><text x="524" y="333" class="fig1-t">evaluate</text>
-  <line x1="558" y1="329" x2="572" y2="329" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="576" y="316" width="56" height="26" rx="3" class="fig1-n"/><text x="604" y="333" class="fig1-t">pass</text>
-  <path d="M524 342 L524 360 L444 360 L444 346" fill="none" stroke="#B5654A" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#fig1-qr)"/>
-  <text x="484" y="376" font-size="10.5" fill="#B5654A" text-anchor="middle">regenerate</text>
-  <text x="416" y="398" class="fig1-s">scored against a fixed rubric, not open feedback</text>
-
-  <!-- ============ diamond ============ -->
-  <line x1="16" y1="424" x2="804" y2="424" stroke="#5C574F" stroke-width="0.8" stroke-dasharray="3 4" opacity="0.5"/>
-  <text x="16" y="452" class="fig1-h">diamond</text>
-  <rect x="16" y="490" width="56" height="26" rx="3" class="fig1-n"/><text x="44" y="507" class="fig1-t">plan</text>
-  <path d="M72 498 L106 470" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <line x1="72" y1="503" x2="106" y2="503" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <path d="M72 508 L106 536" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="110" y="459" width="74" height="22" rx="3" class="fig1-n"/><text x="147" y="474" class="fig1-t">explore A</text>
-  <rect x="110" y="492" width="74" height="22" rx="3" class="fig1-n"/><text x="147" y="507" class="fig1-t">explore B</text>
-  <rect x="110" y="525" width="74" height="22" rx="3" class="fig1-n"/><text x="147" y="540" class="fig1-t">explore C</text>
-  <line x1="184" y1="470" x2="210" y2="470" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <line x1="184" y1="503" x2="210" y2="503" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <line x1="184" y1="536" x2="210" y2="536" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="214" y="459" width="74" height="22" rx="3" class="fig1-v"/><text x="251" y="474" class="fig1-t">verify A</text>
-  <rect x="214" y="492" width="74" height="22" rx="3" class="fig1-v"/><text x="251" y="507" class="fig1-t">verify B</text>
-  <rect x="214" y="525" width="74" height="22" rx="3" class="fig1-v"/><text x="251" y="540" class="fig1-t">verify C</text>
-  <path d="M288 470 L314 498" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <line x1="288" y1="503" x2="314" y2="503" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <path d="M288 536 L314 508" class="fig1-e" marker-end="url(#fig1-q)"/>
-  <rect x="318" y="490" width="76" height="26" rx="3" class="fig1-n"/><text x="356" y="507" class="fig1-t">synthesis</text>
-  <text x="416" y="474" class="fig1-s">verification runs per branch, so one bad source</text>
-  <text x="416" y="492" class="fig1-s">never reaches the synthesis step</text>
-  <text x="416" y="522" class="fig1-s">the most useful pattern for research-heavy work</text>
+  <!-- evaluator-optimizer, full width -->
+  <line x1="16" y1="284" x2="804" y2="284" stroke="#5C574F" stroke-width="0.8" stroke-dasharray="3 4" opacity="0.5"/>
+  <text x="16" y="312" class="fig1-h">evaluator-optimizer</text>
+  <rect x="16" y="330" width="70" height="26" rx="3" class="fig1-n"/><text x="51" y="347" class="fig1-t">generate</text>
+  <line x1="86" y1="343" x2="102" y2="343" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <rect x="106" y="330" width="70" height="26" rx="3" class="fig1-n"/><text x="141" y="347" class="fig1-t">check</text>
+  <line x1="176" y1="343" x2="192" y2="343" class="fig1-e" marker-end="url(#fig1-q)"/>
+  <rect x="196" y="330" width="60" height="26" rx="3" class="fig1-n"/><text x="226" y="347" class="fig1-t">pass</text>
+  <path d="M141 356 L141 378 L51 378 L51 362" fill="none" stroke="#B5654A" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#fig1-qr)"/>
+  <text x="96" y="394" font-size="10.5" fill="#B5654A" text-anchor="middle">retry</text>
+  <text x="320" y="347" class="fig1-s">exit on pass, on a hard bound, or on no progress</text>
 </svg></div></figure>
-      <p><strong>Sequential.</strong> Research → analyse → draft → review → deliver. Use it when the stages are known and each depends on the last.</p>
-      <p><strong>Router.</strong> Request → classify → billing / support / product / human. Use it when the work splits cleanly and only one branch should run.</p>
-      <p><strong>Parallel.</strong> Plan → several independent researchers → synthesis. Use it when subtasks don't depend on each other. Most of the latency wins are here.</p>
-      <p><strong>Orchestrator.</strong> Goal → planner → tools → report. Use it when the planner needs to decide the steps at runtime.</p>
-      <p><strong>Review loop.</strong> Create → review → approve, or revise and check again. Use it when quality matters more than latency.</p>
-      <p><strong>Evaluator.</strong> Draft → evaluate against criteria → pass or regenerate. Same shape as the review loop, with the reviewer scoring against a fixed rubric instead of giving open feedback.</p>
-      <p><strong>Diamond.</strong> Plan → parallel exploration → independent verification → synthesis. One step fans out to parallel agents, evidence gets verified per branch, then it collapses back to sequential.</p>
-      <p>The diamond is the least obvious and the most useful for research-heavy work. Verifying each branch separately means one bad source doesn't get carried into the synthesis step.</p>
-      <p>Most teams default to sequential for everything. Parallelise where the subtasks are independent, and loop where quality matters more than speed.</p>
+      <p><strong>Prompt chaining.</strong> One node's output feeds the next node's input, each with a narrow job. Extract the fields, then format what got extracted, then send it on. The real reason to split this into two nodes instead of one long prompt is context: the extraction step accumulates a lot of scratch reasoning getting to its answer, and the formatting step just needs the final answer. Carrying that forward can add noise to the next step.</p>
+      <p><strong>Routing.</strong> One node classifies, and a conditional edge sends the work down one of several paths. A support ticket that's a password reset goes one way, a ticket alleging lost customer data goes another, with a stronger model and a human in the loop on that second path. Routing is one of the cheaper things you can add here, since it matches cost to difficulty instead of paying frontier-model prices for every request.</p>
+      <p><strong>Parallelization.</strong> The graph fans out to independent nodes and joins their output. Three research agents pull from different sources at once, then a synthesis node combines what came back. This only pays off when the branches genuinely don't depend on each other. If they all need the same context to do their job, you're paying to process that same context three separate times just to save time you might not need saved.</p>
+      <p><strong>Orchestrator-workers.</strong> One node is itself an agent that decides at runtime how much work there is and spins up workers to match. Told to update every call site of a deprecated function, the orchestrator has no way to know how many files are affected until it actually checks. You can't draw this graph in advance, since it only takes shape once the run starts. That's also why it needs a hard cap on worker count, otherwise it'll spawn as many as it thinks the job needs.</p>
+      <p><strong>Evaluator-optimizer.</strong> Generate, check against a condition, loop back on failure, exit on success or a hard bound. Rewriting a function until the type checker passes clean is this pattern at its simplest. The easy part is the happy path, generate, check, pass. The part that actually takes design work is the failure case: what happens when the same fix keeps failing the same way, or the loop starts flipping between two answers that each break what the other one fixed.</p>
+      <p>These are some basic ideas that can help you design your own graphs. You might use some of these as is, or nest and combine them for your own use case. A router can send different requests into entirely different parallelization setups depending on what got classified. People also build what's sometimes called a diamond: fan out to parallel agents, verify each branch on its own, then collapse back into one synthesis step, so a bad source doesn't quietly ride along into the final answer. This is parallelization and evaluator-optimizer combined, and it's often used in research-focused systems. But more often than not, you'll end up customizing something for whatever you're actually building.</p>
       <h2>Every node has a trust level</h2>
       <figure class="fig"><div class="fig-box"><svg preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 372" width="100%" font-family="Georgia, 'Times New Roman', serif">
   <defs>
@@ -445,37 +431,30 @@ body{
   <path d="M726 222 L726 316 L220 316 L220 228" fill="none" stroke="#B5654A" stroke-width="1.3" stroke-dasharray="5 4" marker-end="url(#fig2-g2)"/>
   <text x="473" y="338" text-anchor="middle" font-size="11.5" fill="#B5654A">rejected: back to classify. cycles like this are why agent graphs aren't DAGs</text>
 </svg></div></figure>
-      <p>Take a pipeline that turns a Slack message into a pull request. Four nodes, three different levels of trust in the model:</p>
+      <p>Take a pipeline that turns a Slack message into a pull request. It's routing, parallelization, and an evaluator-optimizer loop stacked together, not any one pattern on its own. Four nodes, three different levels of trust in the model:</p>
       <ul><li>Reading the thread and filing the ticket are API calls. Deterministic code.</li><li>Deciding which kind of doc this is, and writing the final summary, are single model calls with no tools.</li><li>The doc work in each codebase is a full agent run.</li></ul>
       <p>Ask this at every node: if this step gets it wrong, what breaks and who finds out. If the answer is a retry, let the model handle it. If it's a bad change shipped to a customer-facing doc, put a gate there.</p>
-      <p>The graph is also where you record structure you already know. A support flow classifies before it answers. A coding agent reads the repo before it proposes a diff. A compliance flow gets approval before touching anything external. Those are fixed edges, so the model never has to decide them.</p>
+      <p>The graph also lets you encode structure you already know, a support flow classifies before it answers, a compliance flow needs approval before touching anything external. Those can be fixed edges instead of decisions the model makes fresh each time.</p>
       <h2>The hard part is handoffs</h2>
-      <p>One agent with a decent loop needs almost no orchestration. Three agents need a lot, and the problems aren't about capability.</p>
-      <p><strong>What gets passed between nodes.</strong> Full transcript is expensive and noisy. A summary drops things you'll want later. A structured object requires deciding the schema, which requires deciding what actually matters. Most teams skip that and pass whole transcripts by default.</p>
-      <p><strong>Who wins a conflict.</strong> Two agents return different answers. The tiebreak can be a validator node, a confidence ordering, fixed precedence, or a human. Whichever you pick, it should be a node in the graph rather than an assumption.</p>
-      <p><strong>Tool boundaries.</strong> If an engineer can't say which tool applies in a given situation, the agent won't do better. Most first versions ship too many tools with vague parameters. The fix is usually splitting one overloaded agent into two narrower nodes.</p>
-      <p><strong>State.</strong> Decide early whether nodes share one state object or pass messages. Shared state is easier to debug and harder to parallelise. Message passing is the opposite.</p>
+      <p>One agent with a decent loop doesn't need much orchestration. Three agents do, and it's usually not a capability problem.</p>
+      <ul><li><strong>Handoff format.</strong> Full transcript can be expensive and noisy. A summary might drop context you need later. A structured object means deciding the schema, which means deciding what actually matters. Most teams skip that and pass whole transcripts by default.</li><li><strong>Conflict resolution.</strong> Two agents return different answers. The tiebreak can be a validator node, a confidence ordering, fixed precedence, or a human. That choice usually works better as an explicit node in the graph than as an unstated assumption.</li><li><strong>Tool boundaries.</strong> If it's not clear to an engineer which tool applies in a given situation, it's often not clear to the agent either. A lot of first versions ship with too many tools and vague parameters.</li><li><strong>State.</strong> Decide early whether nodes share one state object or pass messages. Shared state is easier to debug and harder to parallelise. Message passing is the opposite.</li></ul>
       <h2>Real graphs have cycles</h2>
-      <p>The word graph makes people picture a clean left-to-right pipeline. Production ones loop constantly: retrying a failed tool call, going back to the user for a missing field, revising after a validator rejects, calling tools until there's enough context, pausing for approval and resuming.</p>
-      <p>A loop is a directed cyclic graph, so loop engineering is a small case of graph engineering.</p>
-      <p>You also can't always fix fan-out width in advance. Map-reduce is the standard case: split the input, send each piece to a worker, combine. Worker count depends on the input. LangGraph has a send primitive for this. If you're building your own orchestration you'll need an equivalent, otherwise you end up hardcoding a fan-out of five and breaking on the sixth source.</p>
+      <p>The word graph makes people picture a clean left-to-right pipeline. Production ones loop constantly, retrying a failed tool call, going back to the user for a missing field, revising after a validator rejects, calling tools until there's enough context, pausing for approval and resuming.</p>
+      <p>A loop is a directed cyclic graph, so loop engineering is really just a small case of graph engineering.</p>
+      <p>You also can't always fix fan-out width in advance. Map-reduce is the standard case: split the input, send each piece to a worker, combine. Worker count depends on the input. LangGraph has a send primitive built for exactly this. If you're building your own orchestration you'll need something equivalent, or you'll end up with a hardcoded fan-out that breaks the moment you get more sources than you planned for.</p>
       <h2>Building one</h2>
-      <p>The fastest way to get a real graph running is Claude Code workflows, which will pick the pattern for you if you describe the shape you want.</p>
-      <p>A prompt that works looks like this:</p>
-      <blockquote><p>Build a PRD for a catch-up module in the Instagram feed. Use workflows and parallel sub-agents to build a double diamond graph. First parallelise analytics, user research, and stakeholder interview agents. Then write the PRD. Then run parallel adversarial sub-agents against it on a loop until each one approves. Share the final for my review.</p><p>Use Opus as the orchestrator, Sonnet for easy to medium tasks, Opus for hard tasks.</p></blockquote>
-      <p>Three things make that prompt work:</p>
-      <ol><li>The outcome is defined, not "help me with a PRD"</li><li>The graph shape is named, including where it fans out and fans back in</li><li>Models are assigned per task, so orchestration and hard reasoning get the expensive models and other tasks don't</li></ol>
-      <p>That third point matters most. A graph is where model selection stops being one global decision and becomes a per-node one.</p>
+      <p>You don't need a framework to start. A switch statement with a state object is already a graph, just an undeclared one. What you actually need is somewhere to persist state between nodes, a way to resume after a failure instead of restarting from node one, and a place to log which path a given run actually took.</p>
+      <p>LangGraph and similar orchestration frameworks earn their keep once you have real cycles, human-in-the-loop pauses, or dynamic fan-out, since hand-rolling checkpointing and resumability for those is real work you'd rather not repeat per project. For a mostly-linear graph with a couple of conditional branches, plain code with an explicit state object is often less overhead than adopting a framework for it.</p>
+      <p>A lot of the design work can happen before you write any of it, deciding the nodes, the trust level at each one, where the edges are conditional. Some of that can also get worked out alongside the build itself, but having even a rough version on paper first tends to save you some rework later.</p>
       <h2>When to skip the graph</h2>
-      <p>Open-ended research is the clearest case. The agent has to plan, delegate, search, read, and synthesise in an order that depends on what it finds. Teams that built research on predefined graphs have generally moved to a harness with a good loop.</p>
+      <p>Open-ended research is the clearest case. The agent has to plan, delegate, search, read, and synthesise in an order that depends on what it finds. LangChain and GPT Researcher both went through this exact move on their own deep research agents, dropping a predefined graph for a harness with a good loop instead.<sup class="fnref"><a id="fnref-3" href="#fn-3">3</a></sup></p>
       <p>The test: can you name the stages before you see the input? If yes, graph it. If the stages depend on what the agent discovers, use a harness.</p>
-      <h2>Draw it before you build it</h2>
-      <p>Every deterministic edge is a decision that your judgment beats the model's. Every agentic node is a decision that flexibility is worth the risk.</p>
-      <p>Those get made either way, usually by whoever writes that part of the code. Drawing the graph first means the team sees them before anything is built on top.</p>
+      <p>There's a study that actually backs this up. Google DeepMind and MIT ran 260 configurations across six benchmarks and found that once a single agent's baseline accuracy on a task already clears roughly 45%, adding more agents produces negative returns, the coordination overhead costs more than the extra agents contribute.<sup class="fnref"><a id="fnref-2" href="#fn-2">2</a></sup> Multi-agent setups gained close to 80% on tasks that decompose cleanly into parallel work, and lost up to 70% on tasks that require strict sequential planning, where splitting the work just fragments the context each agent needs. Putting that into a graph doesn't fix it, it just makes the fragmentation more visible.</p>
     </article>
 
     <footer class="art-foot">
       <p class="byline">by Nitya Vaidya</p>
+      <ol class="footnotes"><li id="fn-1">Anthropic, "Building Effective Agents," December 2024. anthropic.com/research/building-effective-agents <a class="fnback" href="#fnref-1" aria-label="Back to reference 1 in the text">↩</a></li><li id="fn-2">"Capable language models can outgrow the benefits of collaboration," Nature Machine Intelligence (Google DeepMind, MIT). Preprint: arXiv:2512.08296 <a class="fnback" href="#fnref-2" aria-label="Back to reference 2 in the text">↩</a></li><li id="fn-3">LangChain, "3 Years of Graph Engineering with LangGraph," July 2026. <a class="fnback" href="#fnref-3" aria-label="Back to reference 3 in the text">↩</a></li></ol>
     </footer>
 
   </div>

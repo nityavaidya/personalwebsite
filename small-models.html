@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Most of your model calls don&#x27;t need a frontier model — Nitya Vaidya</title>
-<meta name="description" content="Why routing every call to the biggest model is expensive, and what the cascade looks like in practice.">
+<meta name="description" content="On narrow tasks, a small model can outperform a frontier one. Here&#x27;s the case for it.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -87,7 +87,7 @@ body{
 /* spacer so the fixed back button doesn't sit on top of the title on load */
 .back-spacer{height:clamp(64px,10vw,92px)}
 
-/* ---------------- footer: byline only, for now ---------------- */
+/* ---------------- footer: byline + sources beneath it, no rule ---------------- */
 .art-foot{
   margin-top:clamp(32px,5.5vw,52px);
   padding:0 0 clamp(30px,5vw,46px);
@@ -100,6 +100,34 @@ body{
   font-size:17.5px;
   color:rgba(30,27,23,.46);
 }
+.footnotes{
+  margin:18px 0 0;
+  padding-left:1.15em;
+  font-size:12px;
+  line-height:1.65;
+  color:rgba(30,27,23,.52);
+}
+.footnotes li{margin:0 0 6px}
+.footnotes li:last-child{margin-bottom:0}
+.footnotes .fnback{
+  margin-left:5px;
+  color:inherit;
+  text-decoration:none;
+  opacity:.7;
+}
+.footnotes .fnback:hover{opacity:1}
+.footnotes a:not(.fnback){color:inherit;text-decoration:underline;text-decoration-color:rgba(30,27,23,.3)}
+
+/* inline footnote markers in the article body */
+sup.fnref{font-size:.68em;margin-left:1px;line-height:0}
+sup.fnref a{
+  color:#A2512F;
+  font-weight:700;
+  text-decoration:none;
+  padding:0 1px;
+}
+sup.fnref a:hover{text-decoration:underline}
+sup.fnref a:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 /* ---------------- article head ---------------- */
 .art-head{padding:clamp(28px,6vw,52px) 0 clamp(36px,6vw,56px)}
@@ -260,44 +288,44 @@ body{
     <header class="art-head">
       <p class="eyebrow">Writings</p>
       <h1 class="art-title">Most of your model calls don&#x27;t need a frontier model</h1>
-      <p class="art-dek">Why routing every call to the biggest model is expensive, and what the cascade looks like in practice.</p>
+      <p class="art-dek">On narrow tasks, a small model can outperform a frontier one. Here&#x27;s the case for it.</p>
       <p class="art-meta">6 July 2026<span class="art-topic">SLMs</span></p>
     </header>
 
     <article class="art-body">
-      <p>Most products default to whatever the shiniest model is at the time.</p>
-      <p>I want to walk through why that's expensive, and at times actually worse for the output you're getting, what the alternative looks like in code, and how to tell if it applies to you.</p>
+      <p>There's a version of this industry where 'better model' only ever means bigger, newer, top of the benchmarks. But better at what, exactly?</p>
+      <p>Here's the case for small models in application layer products with matured use cases.</p>
       <h2>Reason one: small models are often more accurate for the job</h2>
-      <p>This is the part that gets buried under the cost conversation, and it shouldn't be. For narrow, vertical tasks, a small model isn't a compromise. It's frequently the better model, quality included.</p>
-      <ul><li><strong>Capacity split.</strong> A frontier model is trained to be reasonably good at poetry, code, legal reasoning, and your classification task, all at once. None of that capacity is dedicated to your specific problem. A small model fine-tuned only on your domain isn't competing with anything else for the same weights.</li><li><strong>Instruction-tuning baggage.</strong> Frontier models are tuned to be broadly helpful, which shows up as hedging, caveats, unnecessary elaboration. A small model tuned tightly on your task doesn't carry any of that into a classification or extraction answer.</li><li><strong>Failure modes you control.</strong> If a frontier model misreads your domain's terms or edge cases, your only lever is a longer prompt. A small model you fine-tune yourself, you retrain directly on the errors your users actually hit.</li><li><strong>Format reliability.</strong> Fine-tuning a small model to always return one exact schema holds up better at scale than prompting a frontier model to do the same.</li><li><strong>Version stability.</strong> Providers update frontier models on their own schedule, and your prompt's behavior can shift without warning. A model you host, you control the version indefinitely.</li></ul>
+      <p>This is the part that gets buried under the cost conversation. On a narrow, well-scoped task, a small model tuned for that one job can outperform a frontier model.</p>
+      <ul><li><strong>Capacity split.</strong> A frontier model is trained to be reasonably good at poetry, code, legal reasoning, and your classification task, all at once. None of that capacity is dedicated to your specific problem. A small model fine-tuned only on your domain isn't competing with anything else for the same weights.</li><li><strong>Instruction-tuning baggage.</strong> Frontier models are tuned to be broadly helpful, which shows up as hedging, caveats, unnecessary elaboration. That doesn't show up the same way in a small model trained tightly on your specific task, so it has less to unlearn.</li><li><strong>Failure modes you control.</strong> If a frontier model misreads your domain's terms or edge cases, your only lever is a longer prompt. A small model you fine-tune yourself, you retrain directly on the errors your users actually hit.</li><li><strong>Format reliability.</strong> Fine-tuning a small model to always return one exact schema holds up better at scale than prompting a frontier model to do the same.</li><li><strong>Version stability.</strong> Providers update frontier models on their own schedule, and your prompt's behavior can shift without warning. A model you host, you control the version indefinitely.</li></ul>
       <p>On a narrow, well-scoped task, it's common for the small model to just be the better one.</p>
-      <h2>Reason two: it's dramatically cheaper, and cheap changes what you can afford to build</h2>
-      <p>Frontier model pricing runs per million tokens in a way that adds up fast once a step runs on every request. A well-run small model, self-hosted or through a provider built for it, costs a fraction of that, often an order of magnitude less.</p>
-      <p>The bigger effect is on what becomes worth building. Running two passes and comparing them for consistency only makes sense if a pass is cheap. Running a background verification check on every doc, every session, every event, only makes sense if you're not rationing calls to stay inside a budget. A lot of "we should check this every time" ideas get scoped down to "we'll check it on a schedule instead," and that's usually a cost decision dressed up as an engineering one.</p>
-      <p>Cheap inference pays for calls you wouldn't have made otherwise, and that's usually where the actual product improvement shows up.</p>
-      <h2>Reason three: it's fast enough to change the feature, not just the response time</h2>
+      <h2>Reason two: it's dramatically cheaper, and cheap changes what you can build</h2>
+      <p>Frontier model pricing runs per million tokens in a way that adds up fast once a step runs on every request. A well-run small model, self-hosted or through a provider built for it, costs a fraction of that, often 10-30x less on equivalent tasks.<sup class="fnref"><a id="fnref-4" href="#fn-4">4</a></sup></p>
+      <p>The bigger effect is on what becomes worth building. A marketplace might want every new listing checked for policy violations before it goes live, or a data team might want every incoming record checked for anomalies as it arrives, instead of catching it later in a nightly batch job. At frontier pricing, both of those are a real line item. At small-model pricing, they're just something you turn on.</p>
+      <p>Most of the product upside here comes from the freedom to make calls you wouldn't have been able to afford at frontier prices. That gap gives you room to experiment more, and that's usually what makes the product better.</p>
+      <h2>Reason three: speed changes the feature, not just the response time</h2>
       <p>A classification step returning in 200ms instead of 2 seconds isn't a faster version of the same feature. It's a different feature. At 200ms it runs inline, in the same request-response cycle the user is already waiting on. At 2 seconds it moves behind a spinner or into a background job, and now you're also building a queue, a status endpoint, and a polling loop just to hide the wait.</p>
-      <p>Slow inference doesn't just delay the answer. It decides the architecture around the answer. Live validation as someone types, a recommendation that updates as inputs change, a check that runs before an action instead of after it, none of these are worth building around a multi-second round trip. They become worth building the moment the round trip is fast enough to sit inline.</p>
-      <h2>Look at what your calls are actually doing</h2>
+      <p>Slow inference doesn't just delay the answer. It decides the architecture around the answer. Live validation as someone types, a recommendation that updates as inputs change, a check that runs before an action instead of after it, these tend to get built once the round trip is fast enough to sit inline, not before.</p>
+      <h2>Look at what your calls are doing</h2>
       <p>Pull up your codebase and list every model call. Next to each one, write what it's being asked to do.</p>
       <p>When I did this on a product I worked on, the list came out roughly:</p>
-      <ul><li>classify an event into one of nine categories</li><li>extract three fields from a text blob</li><li>decide if two records are the same record</li><li>trim a sentence to fit a character limit</li><li>check whether a response contained a number</li><li>decide which of four follow-up questions to ask</li><li>write the actual recommendation copy</li><li>plan a multi-step investigation</li></ul>
+      <ul><li>classify an event into one of nine categories</li><li>extract three fields from a text blob</li><li>decide if two records are the same record</li><li>trim a sentence to fit a character limit</li><li>check whether a response contained a number</li><li>decide which of four follow-up questions to ask</li><li>write the recommendation copy itself</li><li>plan a multi-step investigation</li></ul>
       <p>The last two needed reasoning. The other six were pattern work, and all eight were going to a frontier model.</p>
       <p>Most application layer products look like this. One or two hard steps, wrapped in a lot of classification, extraction, and routing, and every one of those narrow steps is a candidate for the small-model argument above.</p>
       <h2>Pick the model per step, not per product</h2>
-      <p>Teams benchmark "our use case" as one blob, find the small model does worse, and stop there. What that measures is whether one model can cover ten different tasks at once, which was never the actual question.</p>
+      <p>Teams benchmark "our use case" as one blob, find the small model does worse, and stop there. What that measures is whether one model can cover ten different tasks at once, which was never really the question.</p>
       <p>Split the steps out and the answer changes per row:</p>
       <div class="table-wrap"><table><thead><tr><th>step</th><th>what it needs</th><th>model</th></tr></thead><tbody><tr><td>classification into known labels</td><td>consistency, low latency</td><td>small</td></tr><tr><td>extraction against a fixed schema</td><td>format adherence</td><td>small</td></tr><tr><td>routing between tools or paths</td><td>speed, runs on every request</td><td>small</td></tr><tr><td>deduplication and matching</td><td>consistency</td><td>small</td></tr><tr><td>summarising a known doc type</td><td>domain fit</td><td>small, fine-tuned</td></tr><tr><td>open-ended planning</td><td>reasoning over novel input</td><td>large</td></tr><tr><td>copy that has to sound human</td><td>breadth</td><td>large</td></tr></tbody></table></div>
       <p>The test for any step: can you write a rubric for what a correct output looks like? If yes, a small model can hold it, and often hold it better. If you can't write the rubric, keep the frontier model there.</p>
       <h2>What counts as small</h2>
       <p>Parameter count is a bad definition. Use deployability: a model you can serve on one GPU, on-prem, or on-device. In practice that's a few hundred million up to about 20B, and the ceiling moves every few months.</p>
       <p>What's in that range right now: Phi, Gemma 3n with its mobile-optimised encoders, Ministral 3 at 3B, SmolLM3 with a 64K trained context that extends to 128K via YaRN, Qwen2, Llama 3.2 at 1B and 3B.</p>
-      <p>Distillation and better post-training closed most of the gap. A well-tuned 7B from this year holds up against much larger models from two years ago on narrow tasks. On open-ended work the gap is still wide.</p>
+      <p>Distillation and better post-training closed most of the gap. DeepSeek did this publicly with R1, distilling it into 7B and 8B versions that get close to the full 671B model's scores on focused reasoning benchmarks.<sup class="fnref"><a id="fnref-1" href="#fn-1">1</a></sup> Microsoft's Phi-4 does something similar, matching models several times its size on math and logic tasks.<sup class="fnref"><a id="fnref-2" href="#fn-2">2</a></sup> A well-tuned 7B from this year can hold up against much larger models from two years ago on narrow tasks. On open-ended work the gap is still wide.</p>
       <p>Serving depends on where you're running:</p>
       <ul><li><strong>vLLM</strong> for throughput on your own GPU, with continuous batching, if you're handling real volume</li><li><strong>Ollama</strong> for local development and small internal deployments</li><li><strong>llama.cpp</strong> for edge and on-device, quantized down to 4-bit</li><li><strong>Together, Fireworks, Groq</strong> for small-model pricing without owning infrastructure</li></ul>
-      <p>Quantization matters more than most teams expect. A 7B at 4-bit fits comfortably on consumer hardware, and quality loss on classification and extraction is small. On reasoning tasks it isn't.</p>
+      <p>Quantization matters more than most teams expect. A 7B at 4-bit fits comfortably on consumer hardware, and quality loss on classification and extraction is small. On reasoning and math tasks it isn't, degradation there is well documented and can be substantial at low bit-widths.<sup class="fnref"><a id="fnref-3" href="#fn-3">3</a></sup></p>
       <h2>Route, don't replace</h2>
-      <p>Nobody swaps the frontier model out wholesale. The pattern that ships is a cascade.</p>
+      <p>For most teams, implementing this doesn't mean swapping out the frontier model. It looks like a cascade.</p>
       <figure class="fig"><div class="fig-box"><svg preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 300" width="100%" font-family="Georgia, 'Times New Roman', serif">
   <defs>
     <marker id="fig3-ar" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#5C574F"/></marker>
@@ -338,7 +366,7 @@ body{
       <ol><li><strong>Schema validation.</strong> The output has to parse into your expected structure. Cheapest and most reliable trigger available.</li><li><strong>Two-pass disagreement.</strong> Run the small model twice at temperature and compare. Disagreement escalates. Costs 2x small-model calls, still far below one frontier call.</li><li><strong>Out-of-distribution check.</strong> Input length, language, or domain outside what the small model was tuned on.</li><li><strong>Logprob confidence.</strong> Works, but calibration on small models is unreliable enough that I'd use it as a tiebreak rather than a primary trigger.</li></ol>
       <p>Log every escalation. After a month you have an escalation rate per step, which tells you where the small model holds up and where to spend fine-tuning effort.</p>
       <h2>You need evals first</h2>
-      <p>To move a step from a frontier model to a small one, you have to know whether that step got worse, or in a lot of cases, whether it actually got better. Most application teams have no way to check either.</p>
+      <p>To move a step from a frontier model to a small one, you have to know whether that step got worse, or in a lot of cases, whether it got better. This is where strong evals come in.</p>
       <p>Minimum version, per step:</p>
       <ul><li>50 to 200 labelled inputs with expected outputs</li><li>a scoring function: exact match for classification, field-level F1 for extraction, an LLM judge with a rubric for anything generative</li><li>a baseline run on your current model, saved</li></ul>
       <p>That's about a day of work. After that you can swap the model and roll back if it gets worse, and just as often you'll find it didn't.</p>
@@ -349,6 +377,7 @@ body{
 
     <footer class="art-foot">
       <p class="byline">by Nitya Vaidya</p>
+      <ol class="footnotes"><li id="fn-1">DeepSeek AI, "DeepSeek-R1," January 2025 — distilled 7B/8B/14B/32B/70B variants benchmarked against the full 671B model. <a class="fnback" href="#fnref-1" aria-label="Back to reference 1 in the text">↩</a></li><li id="fn-2">Microsoft, "Phi-4 Technical Report," December 2024. <a class="fnback" href="#fnref-2" aria-label="Back to reference 2 in the text">↩</a></li><li id="fn-3">"Quantization Meets Reasoning: Exploring LLM Low-Bit Quantization Degradation for Mathematical Reasoning," arXiv:2501.03035. <a class="fnback" href="#fnref-3" aria-label="Back to reference 3 in the text">↩</a></li><li id="fn-4">Distil Labs, "The 10x Inference Tax You Don't Have to Pay," March 2026 — benchmarked fine-tuned SLMs (0.6B-8B) against 10 frontier LLMs across 8 datasets. <a class="fnback" href="#fnref-4" aria-label="Back to reference 4 in the text">↩</a></li></ol>
     </footer>
 
   </div>
