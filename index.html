@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nitya Vaidya</title>
-<meta name="description" content="Nitya Vaidya — product manager and former founder. A 0 to 1 builder who has shipped AI products at scale.">
+<meta name="description" content="Nitya Vaidya — product manager and former founder. Inference architecture, the economics of attention in software, and infrastructure that gives small teams unfair advantages.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -64,17 +64,18 @@ body{
 .inner{max-width:var(--measure);margin:0 auto;padding:0 var(--gutter)}
 
 /* ---------------- masthead ---------------- */
-.masthead{background:var(--grey);padding:clamp(64px,11vw,132px) 0 clamp(54px,7vw,86px)}
+.masthead{background:var(--grey);padding:clamp(40px,7vw,80px) 0 clamp(30px,4vw,44px)}
 .name{
   font-family:"Newsreader",Georgia,serif;
   font-weight:500;
-  font-size:clamp(50px,10vw,106px);
+  font-size:clamp(42px,8vw,82px);
   line-height:.94;
   letter-spacing:-.022em;
   margin:0;
 }
-.role{font-weight:500;font-size:clamp(16px,2.1vw,19px);letter-spacing:-.005em;margin:22px 0 0}
-.lede{font-size:clamp(15.5px,2vw,17.5px);color:rgba(30,27,23,.72);margin:9px 0 0}
+.role{font-weight:500;font-size:clamp(15px,1.8vw,17px);letter-spacing:-.005em;margin:14px 0 0}
+.lede{font-size:clamp(14px,1.6vw,15px);line-height:1.5;color:rgba(30,27,23,.72);margin:8px 0 0;max-width:60ch}
+.lede:first-of-type{margin-top:14px}
 
 /* ---------------- layered folders ---------------- */
 .stack{flex:1 1 auto;display:flex;flex-direction:column}
@@ -307,10 +308,15 @@ body{
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* ---------------- responsive ---------------- */
+@media (max-width:1024px){
+  .masthead > .inner{padding-left:clamp(40px,8vw,64px)}
+}
+
 @media (max-width:680px){
-  :root{--fillet:11px;--tab-drop:15px;--tl-indent:24px;--tex-size:680px}
-  .folder--play{--off:20%}
-  .folder--write{--off:8%}
+  :root{--fillet:11px;--tab-drop:15px;--tl-indent:24px;--tex-size:680px;--gutter:clamp(36px,8vw,48px)}
+  .masthead{padding-bottom:clamp(42px,7vw,52px)}
+  .folder--play{--off:20%;margin-top:2px}
+  .folder--write{--off:8%;margin-top:2px}
   .tab{font-size:11px;padding:0 14px;height:36px;line-height:36px;letter-spacing:.07em}
   .tl-item{padding-bottom:42px}
   .split{gap:14px}
@@ -331,7 +337,9 @@ body{
     <div class="inner">
       <h1 class="name">Nitya Vaidya</h1>
       <p class="role">Product Manager &amp; Former Founder</p>
-      <p class="lede">A 0&nbsp;→&nbsp;1 builder who has shipped AI products at scale.</p>
+      <p class="lede">I started out helping other founders, building an accelerator and putting together programs that got early teams in front of investors. From there, I joined growing startups myself, and eventually built my own.</p>
+      <p class="lede">Paperplane was an AI product that went from an idea to revenue fast. Taking it from zero to one at real scale is still the most formative thing I've done.</p>
+      <p class="lede">I'm interested in inference architecture that serves the product instead of the other way around, the economics of attention in software, and infrastructure and systems that give small teams unfair advantages.</p>
     </div>
   </header>
 
