@@ -40,12 +40,13 @@ body{
   color:var(--ink);
   background:var(--grey);
   font-family:"Inter",system-ui,-apple-system,sans-serif;
-  font-size:16px;
-  line-height:1.55;
+  font-size:15px;
+  line-height:1.5;
   -webkit-font-smoothing:antialiased;
 }
 
-.page{position:relative;min-height:100vh;min-height:100dvh;max-height:100vh;max-height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.page{position:relative;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.page.all-closed{max-height:100vh;max-height:100dvh;overflow:hidden}
 
 /* one continuous sheet of paper across the full document height */
 .page::before{
@@ -185,16 +186,17 @@ body{
 }
 .entry-note{
   font-family:"Newsreader",Georgia,serif;font-style:italic;
-  font-size:clamp(16.5px,2.1vw,19px);line-height:1.4;margin:9px 0 0;max-width:48ch;
+  font-size:clamp(16px,2vw,18px);line-height:1.4;margin:9px 0 0;max-width:48ch;
+  color:rgba(30,27,23,.78);
 }
 .points{list-style:none;margin:20px 0 0;padding:0;max-width:62ch}
-.points li{position:relative;padding-left:19px;margin:0 0 8px;font-size:15.5px;color:rgba(30,27,23,.86)}
+.points li{position:relative;padding-left:19px;margin:0 0 8px;font-size:clamp(14px,1.6vw,15px);color:rgba(30,27,23,.86)}
 .points li::before{content:"";position:absolute;left:0;top:.66em;width:9px;height:1px;background:rgba(30,27,23,.55)}
 
 .split{display:flex;flex-wrap:wrap;gap:16px 44px;margin:22px 0 0}
 .split div{min-width:200px}
 .split dt{font-weight:600;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(30,27,23,.58);margin:0 0 3px}
-.split dd{margin:0;font-size:15.5px}
+.split dd{margin:0;font-size:clamp(14px,1.6vw,15px)}
 
 /* ---------------- outside of work ---------------- */
 .things{
@@ -214,7 +216,7 @@ body{
 }
 .thing:hover svg{transform:rotate(0deg) translateY(-4px) scale(1.04)}
 .thing h4{margin:6px 0 0;font-weight:600;font-size:14px;letter-spacing:.02em}
-.thing p{margin:5px 0 0;font-size:15px;line-height:1.5;color:rgba(30,27,23,.78);max-width:29ch}
+.thing p{margin:5px 0 0;font-size:clamp(14px,1.6vw,15px);line-height:1.5;color:rgba(30,27,23,.78);max-width:29ch}
 
 /* ---------------- writings ---------------- */
 .card{
@@ -227,7 +229,7 @@ body{
 }
 .card::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:#C2452E}
 .card h3{font-family:"Newsreader",Georgia,serif;font-weight:500;font-size:26px;letter-spacing:-.01em;margin:8px 0 0}
-.card p{margin:8px 0 0;font-size:15.5px;color:rgba(30,27,23,.76);max-width:36ch}
+.card p{margin:8px 0 0;font-size:clamp(14px,1.6vw,15px);color:rgba(30,27,23,.76);max-width:36ch}
 
 
 /* ---------------- writings index ---------------- */
@@ -273,7 +275,7 @@ body{
 .post-dek{
   display:block;
   margin-top:9px;
-  font-size:15px;line-height:1.55;
+  font-size:clamp(14px,1.6vw,15px);line-height:1.5;
   color:rgba(30,27,23,.7);
   max-width:56ch;
 }
@@ -291,15 +293,17 @@ body{
 
 /* ---------------- footer ---------------- */
 .foot{margin-top:auto;padding-top:60px}
-.foot ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px 32px}
+.foot ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:10px 32px}
 .foot li{position:relative}
 .foot a,.foot button{
   display:inline-flex;align-items:center;gap:9px;
-  font-family:inherit;font-size:15px;font-weight:500;
+  font-family:inherit;font-size:clamp(14px,1.6vw,15px);font-weight:500;
   color:var(--ink);text-decoration:none;
   background:none;border:0;padding:0;margin:0;cursor:pointer;
   border-bottom:1px solid transparent;
   transition:border-color .2s ease,opacity .2s ease;
+  vertical-align:baseline;
+  line-height:1;
 }
 .foot a:hover,.foot button:hover{border-bottom-color:rgba(30,27,23,.5)}
 .foot a:focus-visible,.foot button:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:2px}
@@ -309,7 +313,7 @@ body{
 
 /* ---------------- responsive ---------------- */
 @media (max-width:1024px){
-  .masthead > .inner{padding-left:clamp(40px,8vw,64px)}
+  .inner{padding-left:clamp(40px,8vw,64px)}
 }
 
 @media (max-width:680px){
@@ -560,9 +564,9 @@ body{
         <footer class="foot"><div class="inner">
           <ul>
             <li>
-              <button type="button" id="copy-email" data-email="vaidyanitya@outlook.com" title="Click to copy">
+              <button type="button" id="copy-email" title="Click to copy email">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 7 8.1 5.6a1.6 1.6 0 0 0 1.8 0L21 7"/></svg>
-                <span id="copy-label">vaidyanitya@outlook.com</span>
+                <span id="copy-label">Email</span>
               </button>
               <span class="sr" aria-live="polite" id="copy-status"></span>
             </li>
@@ -582,7 +586,16 @@ body{
 
 <script>
 (function () {
+  var page = document.querySelector('.page');
   var folders = [].slice.call(document.querySelectorAll('.folder'));
+
+  function updatePageLock() {
+    var anyOpen = folders.some(function (f) {
+      return f.getAttribute('data-open') === 'true';
+    });
+    page.classList.toggle('all-closed', !anyOpen);
+  }
+
   folders.forEach(function (folder) {
     var tab = folder.querySelector('.tab');
     tab.addEventListener('click', function () {
@@ -595,14 +608,19 @@ body{
         folder.setAttribute('data-open', 'true');
         tab.setAttribute('aria-expanded', 'true');
       }
+      updatePageLock();
     });
   });
+
+  updatePageLock();
 
   var btn = document.getElementById('copy-email');
   var label = document.getElementById('copy-label');
   var status = document.getElementById('copy-status');
   var original = label.textContent;
   var timer;
+  var _e = [118,97,105,100,121,97,110,105,116,121,97,64,111,117,116,108,111,111,107,46,99,111,109];
+  function _d() { return _e.map(function(c){return String.fromCharCode(c)}).join('') }
 
   function copy(text) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -624,9 +642,10 @@ body{
   }
 
   btn.addEventListener('click', function () {
-    copy(btn.dataset.email).then(function () {
+    var addr = _d();
+    copy(addr).then(function () {
       clearTimeout(timer);
-      label.textContent = 'Copied to clipboard';
+      label.textContent = 'Copied!';
       status.textContent = 'Email address copied';
       btn.setAttribute('data-copied', 'true');
       timer = setTimeout(function () {
@@ -635,7 +654,7 @@ body{
         btn.removeAttribute('data-copied');
       }, 1800);
     }).catch(function () {
-      window.location.href = 'mailto:' + btn.dataset.email;
+      window.location.href = 'mailto:' + addr;
     });
   });
 })();
